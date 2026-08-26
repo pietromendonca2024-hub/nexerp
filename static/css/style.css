@@ -941,3 +941,224 @@ tbody tr:last-child td {
     }
 
 }
+/* =========================
+   HISTÓRICO 2.0
+========================= */
+
+.filter-panel {
+    background: var(--surface);
+
+    border: 1px solid var(--border);
+
+    border-radius: 16px;
+
+    padding: 22px;
+
+    box-shadow: var(--shadow);
+}
+
+.filters {
+    display: grid;
+
+    grid-template-columns:
+        minmax(200px, 2fr)
+        minmax(150px, 1fr)
+        minmax(140px, 1fr)
+        minmax(140px, 1fr)
+        auto;
+
+    gap: 14px;
+
+    align-items: end;
+}
+
+.filter-field {
+    display: flex;
+    flex-direction: column;
+
+    gap: 7px;
+}
+
+.filter-field label {
+    font-size: 12px;
+    font-weight: 700;
+
+    color: var(--muted);
+}
+
+.filter-field input,
+.filter-field select {
+    width: 100%;
+
+    height: 43px;
+
+    padding: 0 12px;
+
+    background: white;
+
+    border: 1px solid var(--border);
+
+    border-radius: 9px;
+
+    font-size: 14px;
+
+    outline: none;
+}
+
+.filter-field input:focus,
+.filter-field select:focus {
+    border-color: var(--primary);
+
+    box-shadow:
+        0 0 0 3px rgba(37, 99, 235, 0.08);
+}
+
+.filter-buttons {
+    display: flex;
+
+    gap: 8px;
+}
+
+.filter-buttons button {
+    height: 43px;
+
+    padding: 0 18px;
+
+    border: none;
+
+    border-radius: 9px;
+
+    background: var(--primary);
+    color: white;
+
+    font-weight: 700;
+
+    cursor: pointer;
+}
+
+.filter-buttons button:hover {
+    background: var(--primary-hover);
+}
+
+.filter-buttons a {
+    height: 43px;
+
+    display: flex;
+
+    align-items: center;
+
+    padding: 0 14px;
+
+    border: 1px solid var(--border);
+
+    border-radius: 9px;
+
+    color: var(--muted);
+
+    text-decoration: none;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    background: white;
+}
+
+
+/* RESUMO */
+
+.history-summary {
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, minmax(0, 220px));
+
+    gap: 15px;
+
+    margin-top: 20px;
+}
+
+.history-summary > div {
+    background: white;
+
+    border: 1px solid var(--border);
+
+    border-radius: 13px;
+
+    padding: 17px;
+
+    box-shadow: var(--shadow);
+}
+
+.history-summary span {
+    display: block;
+
+    color: var(--muted);
+
+    font-size: 12px;
+}
+
+.history-summary strong {
+    display: block;
+
+    margin-top: 6px;
+
+    font-size: 20px;
+}
+
+
+/* PAGAMENTO */
+
+.payment-badge {
+    display: inline-block;
+
+    padding: 6px 10px;
+
+    background: #eff6ff;
+
+    color: #1d4ed8;
+
+    border-radius: 999px;
+
+    font-size: 12px;
+    font-weight: 700;
+}
+
+
+/* RESPONSIVO */
+
+@media (max-width: 1100px) {
+
+    .filters {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+
+    .filter-buttons {
+        grid-column: 1 / -1;
+    }
+
+}
+
+@media (max-width: 600px) {
+
+    .filters {
+        grid-template-columns: 1fr;
+    }
+
+    .filter-buttons {
+        grid-column: auto;
+    }
+
+    .history-summary {
+        grid-template-columns: 1fr 1fr;
+    }
+
+}
+
+@media (max-width: 400px) {
+
+    .history-summary {
+        grid-template-columns: 1fr;
+    }
+
+}

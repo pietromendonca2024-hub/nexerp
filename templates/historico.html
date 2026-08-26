@@ -1,10 +1,22 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
     <title>NexERP | Histórico</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}"
+    >
+
 </head>
 
 <body>
@@ -17,25 +29,210 @@
     </div>
 
     <nav>
-    <a href="{{ url_for('dashboard') }}">Dashboard</a>
-    <a href="{{ url_for('produtos') }}">Produtos</a>
-    <a href="{{ url_for('clientes') }}">Clientes</a>
-    <a href="{{ url_for('vendas') }}">Vendas</a>
-    <a href="{{ url_for('historico') }}">Histórico</a>
-</nav>
 
-    <a href="{{ url_for('logout') }}" class="logout">Sair</a>
+        <a href="{{ url_for('dashboard') }}">
+            Dashboard
+        </a>
+
+        <a href="{{ url_for('produtos') }}">
+            Produtos
+        </a>
+
+        <a href="{{ url_for('clientes') }}">
+            Clientes
+        </a>
+
+        <a href="{{ url_for('vendas') }}">
+            Vendas
+        </a>
+
+        <a
+            href="{{ url_for('historico') }}"
+            class="active"
+        >
+            Histórico
+        </a>
+
+    </nav>
+
+    <a
+        href="{{ url_for('logout') }}"
+        class="logout"
+    >
+        Sair
+    </a>
 
 </aside>
+
 
 <main class="content">
 
     <div class="topbar">
+
         <div>
             <h1>Histórico de Vendas</h1>
-            <p>Acompanhe todas as vendas registradas.</p>
+
+            <p>
+                Consulte e filtre as vendas registradas.
+            </p>
         </div>
+
     </div>
+
+
+    <!-- FILTROS -->
+
+    <section class="filter-panel">
+
+        <form
+            method="GET"
+            class="filters"
+        >
+
+            <div class="filter-field search-field">
+
+                <label>
+                    Buscar
+                </label>
+
+                <input
+                    type="text"
+                    name="busca"
+                    value="{{ busca }}"
+                    placeholder="Cliente ou produto..."
+                >
+
+            </div>
+
+
+            <div class="filter-field">
+
+                <label>
+                    Pagamento
+                </label>
+
+                <select name="pagamento">
+
+                    <option value="">
+                        Todos
+                    </option>
+
+                    <option
+                        value="Pix"
+                        {% if pagamento == "Pix" %}selected{% endif %}
+                    >
+                        Pix
+                    </option>
+
+                    <option
+                        value="Dinheiro"
+                        {% if pagamento == "Dinheiro" %}selected{% endif %}
+                    >
+                        Dinheiro
+                    </option>
+
+                    <option
+                        value="Cartão de débito"
+                        {% if pagamento == "Cartão de débito" %}selected{% endif %}
+                    >
+                        Cartão de débito
+                    </option>
+
+                    <option
+                        value="Cartão de crédito"
+                        {% if pagamento == "Cartão de crédito" %}selected{% endif %}
+                    >
+                        Cartão de crédito
+                    </option>
+
+                    <option
+                        value="Transferência"
+                        {% if pagamento == "Transferência" %}selected{% endif %}
+                    >
+                        Transferência
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="filter-field">
+
+                <label>
+                    De
+                </label>
+
+                <input
+                    type="date"
+                    name="data_inicio"
+                    value="{{ data_inicio }}"
+                >
+
+            </div>
+
+
+            <div class="filter-field">
+
+                <label>
+                    Até
+                </label>
+
+                <input
+                    type="date"
+                    name="data_fim"
+                    value="{{ data_fim }}"
+                >
+
+            </div>
+
+
+            <div class="filter-buttons">
+
+                <button type="submit">
+                    Filtrar
+                </button>
+
+                <a href="{{ url_for('historico') }}">
+                    Limpar
+                </a>
+
+            </div>
+
+        </form>
+
+    </section>
+
+
+    <!-- RESUMO -->
+
+    <section class="history-summary">
+
+        <div>
+
+            <span>Resultados</span>
+
+            <strong>
+                {{ vendas|length }}
+            </strong>
+
+        </div>
+
+
+        <div>
+
+            <span>Total encontrado</span>
+
+            <strong>
+                R$ {{ "%.2f"|format(total_filtrado) }}
+            </strong>
+
+        </div>
+
+    </section>
+
+
+    <!-- TABELA -->
 
     <section class="table-panel">
 
@@ -46,50 +243,65 @@
             <table>
 
                 <thead>
-    <tr>
-        <th>ID</th>
-        <th>Cliente</th>
-        <th>Produto</th>
-        <th>Quantidade</th>
-        <th>Pagamento</th>
-        <th>Total</th>
-        <th>Data</th>
-    </tr>
-</thead>
+
+                    <tr>
+                        <th>ID</th>
+                        <th>Cliente</th>
+                        <th>Produto</th>
+                        <th>Quantidade</th>
+                        <th>Pagamento</th>
+                        <th>Total</th>
+                        <th>Data</th>
+                    </tr>
+
+                </thead>
+
 
                 <tbody>
 
                     {% for venda in vendas %}
 
-                   <tr>
+                    <tr>
 
-    <td>#{{ venda.id }}</td>
+                        <td>
+                            #{{ venda.id }}
+                        </td>
 
-    <td>
-        {{ venda.cliente_nome or "Não informado" }}
-    </td>
+                        <td>
+                            {{ venda.cliente_nome or "Não informado" }}
+                        </td>
 
-    <td>
-        <strong>{{ venda.produto_nome }}</strong>
-    </td>
+                        <td>
+                            <strong>
+                                {{ venda.produto_nome }}
+                            </strong>
+                        </td>
 
-    <td>
-        {{ venda.quantidade }}
-    </td>
+                        <td>
+                            {{ venda.quantidade }}
+                        </td>
 
-    <td>
-        {{ venda.forma_pagamento or "-" }}
-    </td>
+                        <td>
 
-    <td>
-        R$ {{ "%.2f"|format(venda.valor_total) }}
-    </td>
+                            <span class="payment-badge">
+                                {{ venda.forma_pagamento or "-" }}
+                            </span>
 
-    <td>
-        {{ venda.data }}
-    </td>
+                        </td>
 
-</tr>
+                        <td>
+
+                            <strong>
+                                R$ {{ "%.2f"|format(venda.valor_total) }}
+                            </strong>
+
+                        </td>
+
+                        <td>
+                            {{ venda.data }}
+                        </td>
+
+                    </tr>
 
                     {% endfor %}
 
@@ -103,17 +315,19 @@
 
         <div class="empty-state">
 
-            <h3>Nenhuma venda registrada</h3>
+            <h3>
+                Nenhuma venda encontrada
+            </h3>
 
             <p>
-                As vendas realizadas aparecerão aqui.
+                Tente alterar os filtros utilizados.
             </p>
 
             <a
-                href="{{ url_for('vendas') }}"
+                href="{{ url_for('historico') }}"
                 class="primary-button"
             >
-                Registrar primeira venda
+                Limpar filtros
             </a>
 
         </div>

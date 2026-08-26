@@ -380,26 +380,98 @@ def vendas():
 def historico():
     conn = conectar()
 
-    vendas = conn.execute(
-        """
+    busca = request.args.get("busca", "").strip()
+    pagamento = request.args.get("pagamento", "").strip()
+    data_inicio = request.args.get("data_inicio", "").strip()
+    data_fim = request.args.get("data_fim", "").strip()
+
+    query = """
         SELECT
             vendas.id,
-            produtos.nome,
+            produtos.nome AS produto_nome,
+            clientes.nome AS cliente_nome,
             vendas.quantidade,
             vendas.valor_total,
+            vendas.forma_pagamento,
             vendas.data
         FROM vendas
+
         JOIN produtos
         ON produtos.id = vendas.produto_id
-        ORDER BY vendas.id DESC
+
+        LEFT JOIN clientes
+        ON clientes.id = vendas.cliente_id
+
+        WHERE 1 = 1
+    """
+
+    parametros = []
+
+    # Busca por cliente ou produto
+    if busca:
+        query += """
+            AND (
+                produtos.nome LIKE ?
+                OR clientes.nome LIKE ?
+            )
         """
+
+        termo = f"%{busca}%"
+
+        parametros.extend([
+            termo,
+            termo
+        ])
+
+    # Forma de pagamento
+    if pagamento:
+        query += """
+            AND vendas.forma_pagamento = ?
+        """
+
+        parametros.append(pagamento)
+
+    # Data inicial
+    if data_inicio:
+        query += """
+            AND DATE(vendas.data) >= DATE(?)
+        """
+
+        parametros.append(data_inicio)
+
+    # Data final
+    if data_fim:
+        query += """
+            AND DATE(vendas.data) <= DATE(?)
+        """
+
+        parametros.append(data_fim)
+
+    query += """
+        ORDER BY vendas.id DESC
+    """
+
+    vendas = conn.execute(
+        query,
+        parametros
     ).fetchall()
+
+    # Total considerando os filtros
+    total_filtrado = sum(
+        venda["valor_total"]
+        for venda in vendas
+    )
 
     conn.close()
 
     return render_template(
         "historico.html",
-        vendas=vendas
+        vendas=vendas,
+        busca=busca,
+        pagamento=pagamento,
+        data_inicio=data_inicio,
+        data_fim=data_fim,
+        total_filtrado=total_filtrado
     )
 @app.route("/produtos/editar/<int:id>", methods=["GET", "POST"])
 @login_obrigatorio
