@@ -717,6 +717,107 @@ def vendas():
     )
 
     return redirect(url_for("clientes"))
+
+@app.route("/relatorios")
+@login_obrigatorio
+def relatorios():
+    conn = conectar()
+
+    data_inicio = request.args.get("data_inicio", "").strip()
+    data_fim = request.args.get("data_fim", "").strip()
+
+    filtros = []
+    parametros = []
+
+    if data_inicio:
+        filtros.append("DATE(vendas.data) >= DATE(?)")
+        parametros.append(data_inicio)
+
+    if data_fim:
+        filtros.append("DATE(vendas.data) <= DATE(?)")
+        parametros.append(data_fim)
+
+    where = ""
+
+    if filtros:
+        where = "WHERE " + " AND ".join(filtros)
+
+    resumo = conn.execute(
+        f"""
+        SELECT
+            COUNT(*) AS total_vendas,
+            COALESCE(SUM(valor_total), 0) AS faturamento,
+            COALESCE(SUM(quantidade), 0) AS itens_vendidos,
+            COALESCE(AVG(valor_total), 0) AS ticket_medio
+        FROM vendas
+        {where}
+        """,
+        parametros
+    ).fetchone()
+
+    formas_pagamento = conn.execute(
+        f"""
+        SELECT
+            COALESCE(forma_pagamento, 'Não informado') AS forma_pagamento,
+            COUNT(*) AS quantidade,
+            COALESCE(SUM(valor_total), 0) AS total
+        FROM vendas
+        {where}
+        GROUP BY forma_pagamento
+        ORDER BY total DESC
+        """,
+        parametros
+    ).fetchall()
+
+    produtos_mais_vendidos = conn.execute(
+        f"""
+        SELECT
+            produtos.nome,
+            SUM(vendas.quantidade) AS quantidade_vendida,
+            SUM(vendas.valor_total) AS faturamento
+        FROM vendas
+
+        JOIN produtos
+        ON produtos.id = vendas.produto_id
+
+        {where}
+
+        GROUP BY produtos.id, produtos.nome
+        ORDER BY quantidade_vendida DESC
+        LIMIT 10
+        """,
+        parametros
+    ).fetchall()
+
+    vendas_periodo = conn.execute(
+        f"""
+        SELECT
+            DATE(vendas.data) AS dia,
+            COUNT(*) AS quantidade,
+            COALESCE(SUM(vendas.valor_total), 0) AS total
+        FROM vendas
+
+        {where}
+
+        GROUP BY DATE(vendas.data)
+        ORDER BY DATE(vendas.data)
+        """,
+        parametros
+    ).fetchall()
+
+    conn.close()
+
+    return render_template(
+        "relatorios.html",
+        resumo=resumo,
+        formas_pagamento=formas_pagamento,
+        produtos_mais_vendidos=produtos_mais_vendidos,
+        vendas_periodo=vendas_periodo,
+        data_inicio=data_inicio,
+        data_fim=data_fim
+    )
+
+
 if __name__ == "__main__":
     criar_banco()
     app.run(debug=True)

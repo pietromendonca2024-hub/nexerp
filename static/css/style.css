@@ -1162,3 +1162,104 @@ tbody tr:last-child td {
     }
 
 }
+
+/* =========================
+   RELATÓRIOS
+========================= */
+
+.report-filter {
+    display: flex;
+
+    align-items: end;
+
+    gap: 14px;
+
+    flex-wrap: wrap;
+}
+
+.report-filter .filter-field {
+    min-width: 180px;
+}
+
+.report-cards {
+    margin-top: 22px;
+}
+
+.report-cards .card small {
+    display: block;
+
+    margin-top: 8px;
+
+    color: var(--muted);
+
+    font-size: 12px;
+}
+
+.report-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    gap: 24px;
+}
+
+.daily-sales-list {
+    display: flex;
+
+    flex-direction: column;
+}
+
+.daily-sale-item {
+    display: flex;
+
+    justify-content: space-between;
+    align-items: center;
+
+    gap: 20px;
+
+    padding: 15px 0;
+
+    border-bottom:
+        1px solid var(--border);
+}
+
+.daily-sale-item:last-child {
+    border-bottom: none;
+}
+
+.daily-sale-item > div {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 5px;
+}
+
+.daily-sale-item span {
+    color: var(--muted);
+
+    font-size: 12px;
+}
+
+@media (max-width: 900px) {
+
+    .report-grid {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+@media (max-width: 560px) {
+
+    .report-filter {
+        display: grid;
+
+        grid-template-columns: 1fr;
+    }
+
+    .report-filter .filter-field {
+        min-width: 0;
+    }
+
+}

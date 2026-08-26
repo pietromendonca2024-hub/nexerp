@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>NexERP | Relatórios</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}"
+    >
+</head>
+
+<body>
+
+<aside class="sidebar">
+
+    <div class="sidebar-logo">
+        <h2>NexERP</h2>
+        <span>Mini ERP</span>
+    </div>
+
+    <nav>
+        <a href="{{ url_for('dashboard') }}">
+            Dashboard
+        </a>
+
+        <a href="{{ url_for('produtos') }}">
+            Produtos
+        </a>
+
+        <a href="{{ url_for('clientes') }}">
+            Clientes
+        </a>
+
+        <a href="{{ url_for('vendas') }}">
+            Vendas
+        </a>
+
+        <a href="{{ url_for('historico') }}">
+            Histórico
+        </a>
+
+        <a
+            href="{{ url_for('relatorios') }}"
+            class="active"
+        >
+            Relatórios
+        </a>
+    </nav>
+
+    <a
+        href="{{ url_for('logout') }}"
+        class="logout"
+    >
+        Sair
+    </a>
+
+</aside>
+
+
+<main class="content">
+
+    <div class="topbar">
+
+        <div>
+            <h1>Relatórios</h1>
+
+            <p>
+                Analise o desempenho do seu negócio.
+            </p>
+        </div>
+
+    </div>
+
+
+    <!-- FILTRO DE PERÍODO -->
+
+    <section class="filter-panel">
+
+        <form
+            method="GET"
+            class="report-filter"
+        >
+
+            <div class="filter-field">
+
+                <label>Data inicial</label>
+
+                <input
+                    type="date"
+                    name="data_inicio"
+                    value="{{ data_inicio }}"
+                >
+
+            </div>
+
+
+            <div class="filter-field">
+
+                <label>Data final</label>
+
+                <input
+                    type="date"
+                    name="data_fim"
+                    value="{{ data_fim }}"
+                >
+
+            </div>
+
+
+            <div class="filter-buttons">
+
+                <button type="submit">
+                    Gerar relatório
+                </button>
+
+                <a href="{{ url_for('relatorios') }}">
+                    Limpar
+                </a>
+
+            </div>
+
+        </form>
+
+    </section>
+
+
+    <!-- RESUMO -->
+
+    <section class="cards report-cards">
+
+        <div class="card">
+
+            <span>Faturamento</span>
+
+            <strong>
+                R$ {{ "%.2f"|format(resumo.faturamento) }}
+            </strong>
+
+            <small>
+                Valor total do período
+            </small>
+
+        </div>
+
+
+        <div class="card">
+
+            <span>Vendas</span>
+
+            <strong>
+                {{ resumo.total_vendas }}
+            </strong>
+
+            <small>
+                Vendas registradas
+            </small>
+
+        </div>
+
+
+        <div class="card">
+
+            <span>Ticket médio</span>
+
+            <strong>
+                R$ {{ "%.2f"|format(resumo.ticket_medio) }}
+            </strong>
+
+            <small>
+                Média por venda
+            </small>
+
+        </div>
+
+
+        <div class="card">
+
+            <span>Itens vendidos</span>
+
+            <strong>
+                {{ resumo.itens_vendidos }}
+            </strong>
+
+            <small>
+                Unidades vendidas
+            </small>
+
+        </div>
+
+    </section>
+
+
+    <div class="report-grid">
+
+        <!-- FORMAS DE PAGAMENTO -->
+
+        <section class="dashboard-panel">
+
+            <div class="panel-header">
+
+                <div>
+                    <h2>Formas de pagamento</h2>
+
+                    <p>
+                        Distribuição das vendas por pagamento.
+                    </p>
+                </div>
+
+            </div>
+
+
+            {% if formas_pagamento %}
+
+            <div class="table-responsive">
+
+                <table>
+
+                    <thead>
+                        <tr>
+                            <th>Forma</th>
+                            <th>Vendas</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for pagamento in formas_pagamento %}
+
+                        <tr>
+
+                            <td>
+                                <span class="payment-badge">
+                                    {{ pagamento.forma_pagamento }}
+                                </span>
+                            </td>
+
+                            <td>
+                                {{ pagamento.quantidade }}
+                            </td>
+
+                            <td>
+                                <strong>
+                                    R$ {{ "%.2f"|format(pagamento.total) }}
+                                </strong>
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            {% else %}
+
+            <div class="mini-empty">
+                Nenhuma venda encontrada no período.
+            </div>
+
+            {% endif %}
+
+        </section>
+
+
+        <!-- VENDAS POR DIA -->
+
+        <section class="dashboard-panel">
+
+            <div class="panel-header">
+
+                <div>
+                    <h2>Vendas por dia</h2>
+
+                    <p>
+                        Movimentação dentro do período.
+                    </p>
+                </div>
+
+            </div>
+
+
+            {% if vendas_periodo %}
+
+            <div class="daily-sales-list">
+
+                {% for dia in vendas_periodo %}
+
+                <div class="daily-sale-item">
+
+                    <div>
+
+                        <strong>
+                            {{ dia.dia }}
+                        </strong>
+
+                        <span>
+                            {{ dia.quantidade }} vendas
+                        </span>
+
+                    </div>
+
+                    <strong>
+                        R$ {{ "%.2f"|format(dia.total) }}
+                    </strong>
+
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+            {% else %}
+
+            <div class="mini-empty">
+                Nenhuma movimentação encontrada.
+            </div>
+
+            {% endif %}
+
+        </section>
+
+    </div>
+
+
+    <!-- PRODUTOS MAIS VENDIDOS -->
+
+    <section class="dashboard-panel">
+
+        <div class="panel-header">
+
+            <div>
+                <h2>Produtos mais vendidos</h2>
+
+                <p>
+                    Ranking dos produtos no período selecionado.
+                </p>
+            </div>
+
+        </div>
+
+
+        {% if produtos_mais_vendidos %}
+
+        <div class="table-responsive">
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>Posição</th>
+                        <th>Produto</th>
+                        <th>Quantidade</th>
+                        <th>Faturamento</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for produto in produtos_mais_vendidos %}
+
+                    <tr>
+
+                        <td>
+                            #{{ loop.index }}
+                        </td>
+
+                        <td>
+                            <strong>
+                                {{ produto.nome }}
+                            </strong>
+                        </td>
+
+                        <td>
+                            {{ produto.quantidade_vendida }}
+                        </td>
+
+                        <td>
+                            <strong>
+                                R$ {{ "%.2f"|format(produto.faturamento) }}
+                            </strong>
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        {% else %}
+
+        <div class="mini-empty">
+            Nenhum produto vendido neste período.
+        </div>
+
+        {% endif %}
+
+    </section>
+
+</main>
+
+</body>
+</html>
