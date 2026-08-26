@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexERP | Login</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="login-page">
+
+    <div class="login-card">
+        <div class="brand">
+            <h1>NexERP</h1>
+            <p>Gestão simples para o seu negócio.</p>
+        </div>
+
+        {% if erro %}
+            <div class="alert">{{ erro }}</div>
+        {% endif %}
+
+        <form method="POST">
+            <label>Usuário</label>
+            <input
+                type="text"
+                name="usuario"
+                placeholder="Digite seu usuário"
+                required
+            >
+
+            <label>Senha</label>
+            <input
+                type="password"
+                name="senha"
+                placeholder="Digite sua senha"
+                required
+            >
+
+            <button type="submit">Entrar</button>
+        </form>
+
+        <p class="demo">
+            Acesso inicial: admin / 1234
+        </p>
+    </div>
+
+</body>
+</html>

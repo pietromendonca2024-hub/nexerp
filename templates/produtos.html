@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexERP | Produtos</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+<aside class="sidebar">
+
+    <div class="sidebar-logo">
+        <h2>NexERP</h2>
+        <span>Mini ERP</span>
+    </div>
+
+    <nav>
+        <a href="{{ url_for('dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('produtos') }}" class="active">Produtos</a>
+        <a href="{{ url_for('vendas') }}">Vendas</a>
+        <a href="{{ url_for('historico') }}">Histórico</a>
+    </nav>
+
+    <a href="{{ url_for('logout') }}" class="logout">Sair</a>
+
+</aside>
+
+<main class="content">
+
+    <div class="topbar">
+
+        <div>
+            <h1>Produtos</h1>
+            <p>Gerencie os produtos e o estoque.</p>
+        </div>
+
+        <a
+            href="{{ url_for('novo_produto') }}"
+            class="primary-button"
+        >
+            + Novo produto
+        </a>
+
+    </div>
+
+    <section class="table-panel">
+
+        {% if produtos %}
+
+        <div class="table-responsive">
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Produto</th>
+                        <th>Preço</th>
+                        <th>Estoque</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for produto in produtos %}
+
+                    <tr>
+
+                        <td>#{{ produto.id }}</td>
+
+                        <td>
+                            <strong>
+                                {{ produto.nome }}
+                            </strong>
+                        </td>
+
+                        <td>
+                            R$ {{ "%.2f"|format(produto.preco) }}
+                        </td>
+
+                        <td>
+
+                            {% if produto.estoque == 0 %}
+
+                                <span class="stock danger">
+                                    Sem estoque
+                                </span>
+
+                            {% elif produto.estoque <= 5 %}
+
+                                <span class="stock warning">
+                                    {{ produto.estoque }} unidades
+                                </span>
+
+                            {% else %}
+
+                                <span class="stock success">
+                                    {{ produto.estoque }} unidades
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+
+                            <a
+                                href="{{ url_for('excluir_produto', id=produto.id) }}"
+                                class="delete-button"
+                                onclick="return confirm('Deseja excluir este produto?')"
+                            >
+                                Excluir
+                            </a>
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        {% else %}
+
+            <div class="empty-state">
+
+                <h3>Nenhum produto cadastrado</h3>
+
+                <p>
+                    Cadastre seu primeiro produto para
+                    começar a controlar o estoque.
+                </p>
+
+                <a
+                    href="{{ url_for('novo_produto') }}"
+                    class="primary-button"
+                >
+                    Cadastrar produto
+                </a>
+
+            </div>
+
+        {% endif %}
+
+    </section>
+
+</main>
+
+</body>
+</html>

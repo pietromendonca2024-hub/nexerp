@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexERP | Novo Produto</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+<aside class="sidebar">
+    <div class="sidebar-logo">
+        <h2>NexERP</h2>
+        <span>Mini ERP</span>
+    </div>
+
+    <nav>
+        <a href="{{ url_for('dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('produtos') }}" class="active">Produtos</a>
+        <a href="{{ url_for('vendas') }}">Vendas</a>
+        <a href="{{ url_for('historico') }}">Histórico</a>
+    </nav>
+
+    <a href="{{ url_for('logout') }}" class="logout">Sair</a>
+</aside>
+
+<main class="content">
+
+    <div class="topbar">
+        <div>
+            <h1>Novo Produto</h1>
+            <p>Cadastre um novo item no estoque.</p>
+        </div>
+    </div>
+
+    <section class="form-panel">
+
+        <form method="POST" class="product-form">
+
+            <label>Nome do produto</label>
+
+            <input
+                type="text"
+                name="nome"
+                placeholder="Ex: Mouse Gamer"
+                required
+            >
+
+            <label>Preço</label>
+
+            <input
+                type="number"
+                name="preco"
+                step="0.01"
+                min="0"
+                placeholder="Ex: 129.90"
+                required
+            >
+
+            <label>Quantidade em estoque</label>
+
+            <input
+                type="number"
+                name="estoque"
+                min="0"
+                placeholder="Ex: 10"
+                required
+            >
+
+            <div class="form-actions">
+
+                <button type="submit">
+                    Cadastrar produto
+                </button>
+
+                <a href="{{ url_for('produtos') }}">
+                    Cancelar
+                </a>
+
+            </div>
+
+        </form>
+
+    </section>
+
+</main>
+
+</body>
+</html>
