@@ -1263,3 +1263,102 @@ tbody tr:last-child td {
     }
 
 }
+/* =========================
+   EXPORTAÇÃO
+========================= */
+
+.export-actions {
+    display: flex;
+
+    justify-content: space-between;
+    align-items: center;
+
+    gap: 20px;
+
+    margin-top: 20px;
+
+    padding: 20px 22px;
+
+    background: white;
+
+    border: 1px solid var(--border);
+
+    border-radius: 14px;
+
+    box-shadow: var(--shadow);
+}
+
+.export-actions h3 {
+    font-size: 15px;
+}
+
+.export-actions p {
+    margin-top: 4px;
+
+    color: var(--muted);
+
+    font-size: 12px;
+}
+
+.export-buttons {
+    display: flex;
+
+    gap: 10px;
+}
+
+.export-button {
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
+    padding: 11px 16px;
+
+    border: 1px solid var(--border);
+
+    border-radius: 9px;
+
+    background: white;
+
+    color: var(--text);
+
+    text-decoration: none;
+
+    font-size: 13px;
+    font-weight: 700;
+
+    transition: 0.2s;
+}
+
+.export-button:hover {
+    background: var(--surface-2);
+
+    transform: translateY(-1px);
+}
+
+.primary-export {
+    background: var(--primary);
+    color: white;
+
+    border-color: var(--primary);
+}
+
+.primary-export:hover {
+    background: var(--primary-hover);
+}
+
+@media (max-width: 600px) {
+
+    .export-actions {
+        flex-direction: column;
+
+        align-items: stretch;
+    }
+
+    .export-buttons {
+        display: grid;
+
+        grid-template-columns: 1fr 1fr;
+    }
+
+}

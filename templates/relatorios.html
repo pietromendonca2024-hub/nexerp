@@ -131,6 +131,43 @@
 
     </section>
 
+<div class="export-actions">
+
+    <div>
+        <h3>Exportar relatório</h3>
+
+        <p>
+            Baixe os dados do período selecionado.
+        </p>
+    </div>
+
+    <div class="export-buttons">
+
+        <a
+            href="{{ url_for(
+                'exportar_csv',
+                data_inicio=data_inicio,
+                data_fim=data_fim
+            ) }}"
+            class="export-button"
+        >
+            Exportar CSV
+        </a>
+
+        <a
+            href="{{ url_for(
+                'exportar_pdf',
+                data_inicio=data_inicio,
+                data_fim=data_fim
+            ) }}"
+            class="export-button primary-export"
+        >
+            Gerar PDF
+        </a>
+
+    </div>
+
+</div>
 
     <!-- RESUMO -->
 

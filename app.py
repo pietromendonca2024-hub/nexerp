@@ -1,3 +1,19 @@
+import csv
+import io
+
+from flask import Response, send_file
+
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.units import cm
+from reportlab.platypus import (
+    SimpleDocTemplate,
+    Paragraph,
+    Spacer,
+    Table,
+    TableStyle
+)
 from flask import Flask, render_template, request, redirect, url_for, session
 import sqlite3
 from functools import wraps
@@ -817,6 +833,402 @@ def relatorios():
         data_fim=data_fim
     )
 
+@app.route("/relatorios/csv")
+@login_obrigatorio
+def exportar_csv():
+    conn = conectar()
+
+    data_inicio = request.args.get("data_inicio", "").strip()
+    data_fim = request.args.get("data_fim", "").strip()
+
+    query = """
+        SELECT
+            vendas.id,
+            COALESCE(clientes.nome, 'Não informado') AS cliente,
+            produtos.nome AS produto,
+            vendas.quantidade,
+            vendas.forma_pagamento,
+            vendas.valor_total,
+            vendas.data
+        FROM vendas
+
+        JOIN produtos
+        ON produtos.id = vendas.produto_id
+
+        LEFT JOIN clientes
+        ON clientes.id = vendas.cliente_id
+
+        WHERE 1 = 1
+    """
+
+    parametros = []
+
+    if data_inicio:
+        query += " AND DATE(vendas.data) >= DATE(?)"
+        parametros.append(data_inicio)
+
+    if data_fim:
+        query += " AND DATE(vendas.data) <= DATE(?)"
+        parametros.append(data_fim)
+
+    query += " ORDER BY vendas.id DESC"
+
+    vendas = conn.execute(
+        query,
+        parametros
+    ).fetchall()
+
+    conn.close()
+
+    output = io.StringIO()
+
+    # BOM ajuda o Excel a reconhecer acentos corretamente
+    output.write("\ufeff")
+
+    writer = csv.writer(
+        output,
+        delimiter=";"
+    )
+
+    writer.writerow([
+        "ID",
+        "Cliente",
+        "Produto",
+        "Quantidade",
+        "Pagamento",
+        "Valor Total",
+        "Data"
+    ])
+
+    for venda in vendas:
+        writer.writerow([
+            venda["id"],
+            venda["cliente"],
+            venda["produto"],
+            venda["quantidade"],
+            venda["forma_pagamento"] or "Não informado",
+            f"{venda['valor_total']:.2f}".replace(".", ","),
+            venda["data"]
+        ])
+
+    csv_data = output.getvalue()
+
+    output.close()
+
+    return Response(
+        csv_data,
+        mimetype="text/csv; charset=utf-8",
+        headers={
+            "Content-Disposition":
+            "attachment; filename=relatorio_nexerp.csv"
+        }
+    )
+
+@app.route("/relatorios/pdf")
+@login_obrigatorio
+def exportar_pdf():
+    conn = conectar()
+
+    data_inicio = request.args.get("data_inicio", "").strip()
+    data_fim = request.args.get("data_fim", "").strip()
+
+    filtros = []
+    parametros = []
+
+    if data_inicio:
+        filtros.append(
+            "DATE(vendas.data) >= DATE(?)"
+        )
+        parametros.append(data_inicio)
+
+    if data_fim:
+        filtros.append(
+            "DATE(vendas.data) <= DATE(?)"
+        )
+        parametros.append(data_fim)
+
+    where = ""
+
+    if filtros:
+        where = "WHERE " + " AND ".join(filtros)
+
+    # Resumo
+    resumo = conn.execute(
+        f"""
+        SELECT
+            COUNT(*) AS total_vendas,
+            COALESCE(SUM(valor_total), 0) AS faturamento,
+            COALESCE(SUM(quantidade), 0) AS itens_vendidos,
+            COALESCE(AVG(valor_total), 0) AS ticket_medio
+        FROM vendas
+        {where}
+        """,
+        parametros
+    ).fetchone()
+
+    # Produtos mais vendidos
+    produtos = conn.execute(
+        f"""
+        SELECT
+            produtos.nome,
+            SUM(vendas.quantidade) AS quantidade,
+            SUM(vendas.valor_total) AS faturamento
+        FROM vendas
+
+        JOIN produtos
+        ON produtos.id = vendas.produto_id
+
+        {where}
+
+        GROUP BY produtos.id, produtos.nome
+
+        ORDER BY quantidade DESC
+
+        LIMIT 10
+        """,
+        parametros
+    ).fetchall()
+
+    conn.close()
+
+    buffer = io.BytesIO()
+
+    documento = SimpleDocTemplate(
+        buffer,
+        pagesize=A4,
+        rightMargin=2 * cm,
+        leftMargin=2 * cm,
+        topMargin=2 * cm,
+        bottomMargin=2 * cm
+    )
+
+    elementos = []
+
+    estilos = getSampleStyleSheet()
+
+    # Título
+    elementos.append(
+        Paragraph(
+            "NexERP",
+            estilos["Title"]
+        )
+    )
+
+    elementos.append(
+        Paragraph(
+            "Relatório de Vendas",
+            estilos["Heading2"]
+        )
+    )
+
+    elementos.append(
+        Spacer(1, 0.4 * cm)
+    )
+
+    # Período
+    if data_inicio or data_fim:
+        periodo = (
+            f"Período: "
+            f"{data_inicio or 'Início'} "
+            f"até "
+            f"{data_fim or 'Hoje'}"
+        )
+    else:
+        periodo = "Período: Todas as vendas"
+
+    elementos.append(
+        Paragraph(
+            periodo,
+            estilos["Normal"]
+        )
+    )
+
+    elementos.append(
+        Spacer(1, 0.6 * cm)
+    )
+
+    # Resumo
+    dados_resumo = [
+        ["Indicador", "Resultado"],
+
+        [
+            "Faturamento",
+            f"R$ {resumo['faturamento']:.2f}"
+        ],
+
+        [
+            "Vendas",
+            str(resumo["total_vendas"])
+        ],
+
+        [
+            "Ticket médio",
+            f"R$ {resumo['ticket_medio']:.2f}"
+        ],
+
+        [
+            "Itens vendidos",
+            str(resumo["itens_vendidos"])
+        ]
+    ]
+
+    tabela_resumo = Table(
+        dados_resumo,
+        colWidths=[
+            8 * cm,
+            7 * cm
+        ]
+    )
+
+    tabela_resumo.setStyle(
+        TableStyle([
+            (
+                "BACKGROUND",
+                (0, 0),
+                (-1, 0),
+                colors.HexColor("#0F172A")
+            ),
+
+            (
+                "TEXTCOLOR",
+                (0, 0),
+                (-1, 0),
+                colors.white
+            ),
+
+            (
+                "FONTNAME",
+                (0, 0),
+                (-1, 0),
+                "Helvetica-Bold"
+            ),
+
+            (
+                "GRID",
+                (0, 0),
+                (-1, -1),
+                0.5,
+                colors.HexColor("#E2E8F0")
+            ),
+
+            (
+                "BACKGROUND",
+                (0, 1),
+                (-1, -1),
+                colors.white
+            ),
+
+            (
+                "PADDING",
+                (0, 0),
+                (-1, -1),
+                8
+            )
+        ])
+    )
+
+    elementos.append(tabela_resumo)
+
+    elementos.append(
+        Spacer(1, 0.8 * cm)
+    )
+
+    elementos.append(
+        Paragraph(
+            "Produtos mais vendidos",
+            estilos["Heading2"]
+        )
+    )
+
+    elementos.append(
+        Spacer(1, 0.3 * cm)
+    )
+
+    dados_produtos = [
+        [
+            "Produto",
+            "Quantidade",
+            "Faturamento"
+        ]
+    ]
+
+    for produto in produtos:
+        dados_produtos.append([
+            produto["nome"],
+            produto["quantidade"],
+            f"R$ {produto['faturamento']:.2f}"
+        ])
+
+    if not produtos:
+        dados_produtos.append([
+            "Nenhuma venda encontrada",
+            "-",
+            "-"
+        ])
+
+    tabela_produtos = Table(
+        dados_produtos,
+        colWidths=[
+            8 * cm,
+            3 * cm,
+            4 * cm
+        ]
+    )
+
+    tabela_produtos.setStyle(
+        TableStyle([
+            (
+                "BACKGROUND",
+                (0, 0),
+                (-1, 0),
+                colors.HexColor("#2563EB")
+            ),
+
+            (
+                "TEXTCOLOR",
+                (0, 0),
+                (-1, 0),
+                colors.white
+            ),
+
+            (
+                "FONTNAME",
+                (0, 0),
+                (-1, 0),
+                "Helvetica-Bold"
+            ),
+
+            (
+                "GRID",
+                (0, 0),
+                (-1, -1),
+                0.5,
+                colors.HexColor("#E2E8F0")
+            ),
+
+            (
+                "PADDING",
+                (0, 0),
+                (-1, -1),
+                8
+            )
+        ])
+    )
+
+    elementos.append(
+        tabela_produtos
+    )
+
+    documento.build(elementos)
+
+    buffer.seek(0)
+
+    return send_file(
+        buffer,
+        as_attachment=True,
+        download_name="relatorio_nexerp.pdf",
+        mimetype="application/pdf"
+    )
 
 if __name__ == "__main__":
     criar_banco()
