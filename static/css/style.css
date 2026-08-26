@@ -452,3 +452,19 @@ td {
     outline: none;
     border-color: #2563eb;
 }
+.actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.edit-button {
+    text-decoration: none;
+    color: #2563eb;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.edit-button:hover {
+    text-decoration: underline;
+}

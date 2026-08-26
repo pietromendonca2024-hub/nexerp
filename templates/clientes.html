@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexERP | Clientes</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+<aside class="sidebar">
+    <div class="sidebar-logo">
+        <h2>NexERP</h2>
+        <span>Mini ERP</span>
+    </div>
+
+    <nav>
+        <a href="{{ url_for('dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('produtos') }}">Produtos</a>
+        <a href="{{ url_for('clientes') }}" class="active">Clientes</a>
+        <a href="{{ url_for('vendas') }}">Vendas</a>
+        <a href="{{ url_for('historico') }}">Histórico</a>
+    </nav>
+
+    <a href="{{ url_for('logout') }}" class="logout">Sair</a>
+</aside>
+
+<main class="content">
+
+    <div class="topbar">
+        <div>
+            <h1>Clientes</h1>
+            <p>Gerencie seus clientes cadastrados.</p>
+        </div>
+
+        <a href="{{ url_for('novo_cliente') }}" class="primary-button">
+            + Novo cliente
+        </a>
+    </div>
+
+    <section class="table-panel">
+
+        {% if clientes %}
+
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nome</th>
+                        <th>E-mail</th>
+                        <th>Telefone</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for cliente in clientes %}
+                    <tr>
+                        <td>#{{ cliente.id }}</td>
+                        <td><strong>{{ cliente.nome }}</strong></td>
+                        <td>{{ cliente.email or "-" }}</td>
+                        <td>{{ cliente.telefone or "-" }}</td>
+
+                        <td class="actions">
+                            <a
+                                href="{{ url_for('editar_cliente', id=cliente.id) }}"
+                                class="edit-button"
+                            >
+                                Editar
+                            </a>
+
+                            <a
+                                href="{{ url_for('excluir_cliente', id=cliente.id) }}"
+                                class="delete-button"
+                                onclick="return confirm('Deseja excluir este cliente?')"
+                            >
+                                Excluir
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% else %}
+
+        <div class="empty-state">
+            <h3>Nenhum cliente cadastrado</h3>
+
+            <p>
+                Cadastre seu primeiro cliente para começar.
+            </p>
+
+            <a href="{{ url_for('novo_cliente') }}" class="primary-button">
+                Cadastrar cliente
+            </a>
+        </div>
+
+        {% endif %}
+
+    </section>
+
+</main>
+
+</body>
+</html>

@@ -16,11 +16,12 @@
     </div>
 
     <nav>
-        <a href="{{ url_for('dashboard') }}">Dashboard</a>
-        <a href="{{ url_for('produtos') }}">Produtos</a>
-        <a href="{{ url_for('vendas') }}" class="active">Vendas</a>
-        <a href="{{ url_for('historico') }}">Histórico</a>
-    </nav>
+    <a href="{{ url_for('dashboard') }}">Dashboard</a>
+    <a href="{{ url_for('produtos') }}">Produtos</a>
+    <a href="{{ url_for('clientes') }}">Clientes</a>
+    <a href="{{ url_for('vendas') }}">Vendas</a>
+    <a href="{{ url_for('historico') }}">Histórico</a>
+</nav>
 
     <a href="{{ url_for('logout') }}" class="logout">Sair</a>
 </aside>
@@ -40,37 +41,66 @@
 
         <form method="POST" class="product-form">
 
-            <label>Produto</label>
+    <label>Cliente</label>
 
-            <select name="produto_id" required>
-                <option value="">Selecione um produto</option>
+    <select name="cliente_id">
+        <option value="">Cliente não informado</option>
 
-                {% for produto in produtos %}
-                    <option value="{{ produto.id }}">
-                        {{ produto.nome }} —
-                        R$ {{ "%.2f"|format(produto.preco) }}
-                        — Estoque: {{ produto.estoque }}
-                    </option>
-                {% endfor %}
-            </select>
+        {% for cliente in clientes %}
+            <option value="{{ cliente.id }}">
+                {{ cliente.nome }}
+            </option>
+        {% endfor %}
+    </select>
 
-            <label>Quantidade</label>
 
-            <input
-                type="number"
-                name="quantidade"
-                min="1"
-                placeholder="Ex: 2"
-                required
-            >
+    <label>Produto</label>
 
-            <div class="form-actions">
-                <button type="submit">
-                    Registrar venda
-                </button>
-            </div>
+    <select name="produto_id" required>
+        <option value="">Selecione um produto</option>
 
-        </form>
+        {% for produto in produtos %}
+            <option value="{{ produto.id }}">
+                {{ produto.nome }} —
+                R$ {{ "%.2f"|format(produto.preco) }}
+                — Estoque: {{ produto.estoque }}
+            </option>
+        {% endfor %}
+    </select>
+
+
+    <label>Quantidade</label>
+
+    <input
+        type="number"
+        name="quantidade"
+        min="1"
+        placeholder="Ex: 2"
+        required
+    >
+
+
+    <label>Forma de pagamento</label>
+
+    <select name="forma_pagamento" required>
+        <option value="">Selecione</option>
+        <option value="Pix">Pix</option>
+        <option value="Dinheiro">Dinheiro</option>
+        <option value="Cartão de débito">Cartão de débito</option>
+        <option value="Cartão de crédito">Cartão de crédito</option>
+        <option value="Transferência">Transferência</option>
+    </select>
+
+
+    <div class="form-actions">
+
+        <button type="submit">
+            Registrar venda
+        </button>
+
+    </div>
+
+</form>
 
         {% else %}
 

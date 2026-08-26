@@ -17,11 +17,12 @@
     </div>
 
     <nav>
-        <a href="{{ url_for('dashboard') }}">Dashboard</a>
-        <a href="{{ url_for('produtos') }}">Produtos</a>
-        <a href="{{ url_for('vendas') }}">Vendas</a>
-        <a href="{{ url_for('historico') }}" class="active">Histórico</a>
-    </nav>
+    <a href="{{ url_for('dashboard') }}">Dashboard</a>
+    <a href="{{ url_for('produtos') }}">Produtos</a>
+    <a href="{{ url_for('clientes') }}">Clientes</a>
+    <a href="{{ url_for('vendas') }}">Vendas</a>
+    <a href="{{ url_for('historico') }}">Histórico</a>
+</nav>
 
     <a href="{{ url_for('logout') }}" class="logout">Sair</a>
 
@@ -45,40 +46,50 @@
             <table>
 
                 <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Produto</th>
-                        <th>Quantidade</th>
-                        <th>Total</th>
-                        <th>Data</th>
-                    </tr>
-                </thead>
+    <tr>
+        <th>ID</th>
+        <th>Cliente</th>
+        <th>Produto</th>
+        <th>Quantidade</th>
+        <th>Pagamento</th>
+        <th>Total</th>
+        <th>Data</th>
+    </tr>
+</thead>
 
                 <tbody>
 
                     {% for venda in vendas %}
 
-                    <tr>
+                   <tr>
 
-                        <td>#{{ venda.id }}</td>
+    <td>#{{ venda.id }}</td>
 
-                        <td>
-                            <strong>{{ venda.nome }}</strong>
-                        </td>
+    <td>
+        {{ venda.cliente_nome or "Não informado" }}
+    </td>
 
-                        <td>
-                            {{ venda.quantidade }}
-                        </td>
+    <td>
+        <strong>{{ venda.produto_nome }}</strong>
+    </td>
 
-                        <td>
-                            R$ {{ "%.2f"|format(venda.valor_total) }}
-                        </td>
+    <td>
+        {{ venda.quantidade }}
+    </td>
 
-                        <td>
-                            {{ venda.data }}
-                        </td>
+    <td>
+        {{ venda.forma_pagamento or "-" }}
+    </td>
 
-                    </tr>
+    <td>
+        R$ {{ "%.2f"|format(venda.valor_total) }}
+    </td>
+
+    <td>
+        {{ venda.data }}
+    </td>
+
+</tr>
 
                     {% endfor %}
 

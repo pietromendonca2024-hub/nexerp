@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NexERP | Novo Produto</title>
+    <title>NexERP | Editar Produto</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 
 <body>
 
 <aside class="sidebar">
+
     <div class="sidebar-logo">
         <h2>NexERP</h2>
         <span>Mini ERP</span>
@@ -23,16 +24,21 @@
     <a href="{{ url_for('historico') }}">Histórico</a>
 </nav>
 
-    <a href="{{ url_for('logout') }}" class="logout">Sair</a>
+    <a href="{{ url_for('logout') }}" class="logout">
+        Sair
+    </a>
+
 </aside>
 
 <main class="content">
 
     <div class="topbar">
+
         <div>
-            <h1>Novo Produto</h1>
-            <p>Cadastre um novo item no estoque.</p>
+            <h1>Editar Produto</h1>
+            <p>Atualize as informações do produto.</p>
         </div>
+
     </div>
 
     <section class="form-panel">
@@ -44,7 +50,7 @@
             <input
                 type="text"
                 name="nome"
-                placeholder="Ex: Mouse Gamer"
+                value="{{ produto.nome }}"
                 required
             >
 
@@ -55,7 +61,7 @@
                 name="preco"
                 step="0.01"
                 min="0"
-                placeholder="Ex: 129.90"
+                value="{{ produto.preco }}"
                 required
             >
 
@@ -65,14 +71,14 @@
                 type="number"
                 name="estoque"
                 min="0"
-                placeholder="Ex: 10"
+                value="{{ produto.estoque }}"
                 required
             >
 
             <div class="form-actions">
 
                 <button type="submit">
-                    Cadastrar produto
+                    Salvar alterações
                 </button>
 
                 <a href="{{ url_for('produtos') }}">

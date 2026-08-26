@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NexERP | Novo Produto</title>
+    <title>NexERP | Novo Cliente</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 
@@ -16,12 +16,12 @@
     </div>
 
     <nav>
-    <a href="{{ url_for('dashboard') }}">Dashboard</a>
-    <a href="{{ url_for('produtos') }}">Produtos</a>
-    <a href="{{ url_for('clientes') }}">Clientes</a>
-    <a href="{{ url_for('vendas') }}">Vendas</a>
-    <a href="{{ url_for('historico') }}">Histórico</a>
-</nav>
+        <a href="{{ url_for('dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('produtos') }}">Produtos</a>
+        <a href="{{ url_for('clientes') }}" class="active">Clientes</a>
+        <a href="{{ url_for('vendas') }}">Vendas</a>
+        <a href="{{ url_for('historico') }}">Histórico</a>
+    </nav>
 
     <a href="{{ url_for('logout') }}" class="logout">Sair</a>
 </aside>
@@ -30,8 +30,8 @@
 
     <div class="topbar">
         <div>
-            <h1>Novo Produto</h1>
-            <p>Cadastre um novo item no estoque.</p>
+            <h1>Novo Cliente</h1>
+            <p>Cadastre um cliente no sistema.</p>
         </div>
     </div>
 
@@ -39,46 +39,36 @@
 
         <form method="POST" class="product-form">
 
-            <label>Nome do produto</label>
-
+            <label>Nome</label>
             <input
                 type="text"
                 name="nome"
-                placeholder="Ex: Mouse Gamer"
+                placeholder="Ex: João da Silva"
                 required
             >
 
-            <label>Preço</label>
-
+            <label>E-mail</label>
             <input
-                type="number"
-                name="preco"
-                step="0.01"
-                min="0"
-                placeholder="Ex: 129.90"
-                required
+                type="email"
+                name="email"
+                placeholder="Ex: joao@email.com"
             >
 
-            <label>Quantidade em estoque</label>
-
+            <label>Telefone</label>
             <input
-                type="number"
-                name="estoque"
-                min="0"
-                placeholder="Ex: 10"
-                required
+                type="text"
+                name="telefone"
+                placeholder="Ex: (21) 99999-9999"
             >
 
             <div class="form-actions">
-
                 <button type="submit">
-                    Cadastrar produto
+                    Cadastrar cliente
                 </button>
 
-                <a href="{{ url_for('produtos') }}">
+                <a href="{{ url_for('clientes') }}">
                     Cancelar
                 </a>
-
             </div>
 
         </form>
