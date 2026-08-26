@@ -1,92 +1,383 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>NexERP | Dashboard</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}"
+    >
 </head>
+
 <body>
 
-    <aside class="sidebar">
-        <div class="sidebar-logo">
-            <h2>NexERP</h2>
-            <span>Mini ERP</span>
-        </div>
+<aside class="sidebar">
 
-        <nav>
-    <a href="{{ url_for('dashboard') }}">Dashboard</a>
-    <a href="{{ url_for('produtos') }}">Produtos</a>
-    <a href="{{ url_for('clientes') }}">Clientes</a>
-    <a href="{{ url_for('vendas') }}">Vendas</a>
-    <a href="{{ url_for('historico') }}">Histórico</a>
-</nav>
+    <div class="sidebar-logo">
+        <h2>NexERP</h2>
+        <span>Mini ERP</span>
+    </div>
 
-        <a href="{{ url_for('logout') }}" class="logout">
-            Sair
+    <nav>
+        <a
+            href="{{ url_for('dashboard') }}"
+            class="active"
+        >
+            Dashboard
         </a>
-    </aside>
 
-    <main class="content">
+        <a href="{{ url_for('produtos') }}">
+            Produtos
+        </a>
 
-        <div class="topbar">
-            <div>
-                <h1>Dashboard</h1>
-                <p>Visão geral do seu negócio.</p>
-            </div>
+        <a href="{{ url_for('clientes') }}">
+            Clientes
+        </a>
 
-            <div class="user">
-                Admin
-            </div>
+        <a href="{{ url_for('vendas') }}">
+            Vendas
+        </a>
+
+        <a href="{{ url_for('historico') }}">
+            Histórico
+        </a>
+    </nav>
+
+    <a
+        href="{{ url_for('logout') }}"
+        class="logout"
+    >
+        Sair
+    </a>
+
+</aside>
+
+
+<main class="content">
+
+    <!-- CABEÇALHO -->
+
+    <div class="topbar">
+
+        <div>
+            <h1>Dashboard</h1>
+            <p>
+                Acompanhe os principais dados do seu negócio.
+            </p>
         </div>
 
-        <section class="cards">
+        <div class="user">
+            Admin
+        </div>
 
-            <div class="card">
-                <span>Produtos cadastrados</span>
-                <strong>{{ total_produtos }}</strong>
+    </div>
+
+
+    <!-- CARDS PRINCIPAIS -->
+
+    <section class="cards dashboard-cards">
+
+        <div class="card">
+            <span>Faturamento total</span>
+
+            <strong>
+                R$ {{ "%.2f"|format(faturamento) }}
+            </strong>
+
+            <small>
+                {{ total_vendas }} vendas realizadas
+            </small>
+        </div>
+
+
+        <div class="card">
+            <span>Faturamento hoje</span>
+
+            <strong>
+                R$ {{ "%.2f"|format(faturamento_hoje) }}
+            </strong>
+
+            <small>
+                {{ vendas_hoje }} vendas hoje
+            </small>
+        </div>
+
+
+        <div class="card">
+            <span>Clientes</span>
+
+            <strong>
+                {{ total_clientes }}
+            </strong>
+
+            <small>
+                Clientes cadastrados
+            </small>
+        </div>
+
+
+        <div class="card">
+            <span>Estoque</span>
+
+            <strong>
+                {{ estoque_total }}
+            </strong>
+
+            <small>
+                {{ total_produtos }} produtos cadastrados
+            </small>
+        </div>
+
+    </section>
+
+
+    <!-- AÇÕES -->
+
+    <section class="dashboard-panel">
+
+        <div class="panel-header">
+
+            <div>
+                <h2>Acesso rápido</h2>
+
+                <p>
+                    Principais operações do NexERP.
+                </p>
             </div>
 
-            <div class="card">
-                <span>Itens em estoque</span>
-                <strong>{{ estoque_total }}</strong>
-            </div>
+        </div>
 
-            <div class="card">
-                <span>Vendas realizadas</span>
-                <strong>{{ total_vendas }}</strong>
-            </div>
+        <div class="quick-actions">
 
-            <div class="card">
-                <span>Faturamento</span>
-                <strong>
-                    R$ {{ "%.2f"|format(faturamento) }}
-                </strong>
-            </div>
+            <a href="{{ url_for('vendas') }}">
+                + Registrar venda
+            </a>
 
-        </section>
+            <a href="{{ url_for('novo_produto') }}">
+                + Novo produto
+            </a>
+
+            <a href="{{ url_for('novo_cliente') }}">
+                + Novo cliente
+            </a>
+
+        </div>
+
+    </section>
+
+
+    <!-- GRID -->
+
+    <div class="dashboard-grid">
+
+        <!-- VENDAS RECENTES -->
 
         <section class="dashboard-panel">
-            <h2>Bem-vindo ao NexERP</h2>
 
-            <p>
-                Use o menu lateral para cadastrar produtos,
-                controlar estoque, registrar vendas e acompanhar
-                o histórico do seu negócio.
-            </p>
+            <div class="panel-header">
 
-            <div class="quick-actions">
-                <a href="{{ url_for('novo_produto') }}">
-                    + Novo produto
+                <div>
+                    <h2>Vendas recentes</h2>
+                    <p>Últimas movimentações registradas.</p>
+                </div>
+
+                <a href="{{ url_for('historico') }}">
+                    Ver histórico
                 </a>
 
-                <a href="{{ url_for('vendas') }}">
-                    Registrar venda
-                </a>
             </div>
+
+
+            {% if vendas_recentes %}
+
+                <div class="table-responsive">
+
+                    <table>
+
+                        <thead>
+                            <tr>
+                                <th>Cliente</th>
+                                <th>Produto</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            {% for venda in vendas_recentes %}
+
+                            <tr>
+
+                                <td>
+                                    {{ venda.cliente_nome or "Não informado" }}
+                                </td>
+
+                                <td>
+                                    {{ venda.produto_nome }}
+                                </td>
+
+                                <td>
+                                    <strong>
+                                        R$ {{ "%.2f"|format(venda.valor_total) }}
+                                    </strong>
+                                </td>
+
+                            </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            {% else %}
+
+                <div class="mini-empty">
+                    Nenhuma venda registrada ainda.
+                </div>
+
+            {% endif %}
+
         </section>
 
-    </main>
+
+        <!-- ESTOQUE BAIXO -->
+
+        <section class="dashboard-panel">
+
+            <div class="panel-header">
+
+                <div>
+                    <h2>Estoque baixo</h2>
+                    <p>Produtos que precisam de atenção.</p>
+                </div>
+
+                <a href="{{ url_for('produtos') }}">
+                    Ver produtos
+                </a>
+
+            </div>
+
+
+            {% if estoque_baixo %}
+
+                <div class="stock-list">
+
+                    {% for produto in estoque_baixo %}
+
+                    <div class="stock-item">
+
+                        <div>
+
+                            <strong>
+                                {{ produto.nome }}
+                            </strong>
+
+                            <span>
+                                Produto #{{ produto.id }}
+                            </span>
+
+                        </div>
+
+
+                        {% if produto.estoque == 0 %}
+
+                            <span class="stock danger">
+                                Sem estoque
+                            </span>
+
+                        {% else %}
+
+                            <span class="stock warning">
+                                {{ produto.estoque }} un.
+                            </span>
+
+                        {% endif %}
+
+                    </div>
+
+                    {% endfor %}
+
+                </div>
+
+            {% else %}
+
+                <div class="mini-empty">
+                    Nenhum produto com estoque baixo.
+                </div>
+
+            {% endif %}
+
+        </section>
+
+    </div>
+
+
+    <!-- PRODUTOS MAIS VENDIDOS -->
+
+    <section class="dashboard-panel">
+
+        <div class="panel-header">
+
+            <div>
+                <h2>Produtos mais vendidos</h2>
+
+                <p>
+                    Ranking baseado na quantidade vendida.
+                </p>
+            </div>
+
+        </div>
+
+
+        {% if produtos_mais_vendidos %}
+
+            <div class="ranking-list">
+
+                {% for produto in produtos_mais_vendidos %}
+
+                <div class="ranking-item">
+
+                    <div class="ranking-position">
+                        {{ loop.index }}
+                    </div>
+
+                    <div class="ranking-product">
+
+                        <strong>
+                            {{ produto.nome }}
+                        </strong>
+
+                        <span>
+                            {{ produto.quantidade_vendida }}
+                            unidades vendidas
+                        </span>
+
+                    </div>
+
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+        {% else %}
+
+            <div class="mini-empty">
+                Registre vendas para gerar o ranking.
+            </div>
+
+        {% endif %}
+
+    </section>
+
+</main>
 
 </body>
 </html>

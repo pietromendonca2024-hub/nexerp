@@ -108,23 +108,139 @@ def logout():
 @app.route("/dashboard")
 @login_obrigatorio
 def dashboard():
+    from datetime import datetime, timedelta
+
     conn = conectar()
 
+    # Produtos cadastrados
     total_produtos = conn.execute(
         "SELECT COUNT(*) FROM produtos"
     ).fetchone()[0]
 
+    # Quantidade total em estoque
     estoque_total = conn.execute(
         "SELECT COALESCE(SUM(estoque), 0) FROM produtos"
     ).fetchone()[0]
 
+    # Total de vendas
     total_vendas = conn.execute(
         "SELECT COUNT(*) FROM vendas"
     ).fetchone()[0]
 
+    # Faturamento total
     faturamento = conn.execute(
         "SELECT COALESCE(SUM(valor_total), 0) FROM vendas"
     ).fetchone()[0]
+
+    # Clientes cadastrados
+    total_clientes = conn.execute(
+        "SELECT COUNT(*) FROM clientes"
+    ).fetchone()[0]
+
+    # Faturamento de hoje
+    faturamento_hoje = conn.execute(
+        """
+        SELECT COALESCE(SUM(valor_total), 0)
+        FROM vendas
+        WHERE DATE(data) = DATE('now', 'localtime')
+        """
+    ).fetchone()[0]
+
+    # Vendas de hoje
+    vendas_hoje = conn.execute(
+        """
+        SELECT COUNT(*)
+        FROM vendas
+        WHERE DATE(data) = DATE('now', 'localtime')
+        """
+    ).fetchone()[0]
+
+    # Produtos com estoque baixo
+    estoque_baixo = conn.execute(
+        """
+        SELECT *
+        FROM produtos
+        WHERE estoque <= 5
+        ORDER BY estoque ASC
+        LIMIT 5
+        """
+    ).fetchall()
+
+    # Últimas vendas
+    vendas_recentes = conn.execute(
+        """
+        SELECT
+            vendas.id,
+            produtos.nome AS produto_nome,
+            clientes.nome AS cliente_nome,
+            vendas.quantidade,
+            vendas.valor_total,
+            vendas.forma_pagamento,
+            vendas.data
+        FROM vendas
+
+        JOIN produtos
+        ON produtos.id = vendas.produto_id
+
+        LEFT JOIN clientes
+        ON clientes.id = vendas.cliente_id
+
+        ORDER BY vendas.id DESC
+        LIMIT 5
+        """
+    ).fetchall()
+
+    # Produtos mais vendidos
+    produtos_mais_vendidos = conn.execute(
+        """
+        SELECT
+            produtos.nome,
+            SUM(vendas.quantidade) AS quantidade_vendida
+        FROM vendas
+
+        JOIN produtos
+        ON produtos.id = vendas.produto_id
+
+        GROUP BY produtos.id, produtos.nome
+        ORDER BY quantidade_vendida DESC
+        LIMIT 5
+        """
+    ).fetchall()
+
+    # Faturamento dos últimos 7 dias
+    faturamento_7_dias = conn.execute(
+        """
+        SELECT
+            DATE(data) AS dia,
+            COALESCE(SUM(valor_total), 0) AS total
+        FROM vendas
+        WHERE DATE(data) >= DATE('now', 'localtime', '-6 days')
+        GROUP BY DATE(data)
+        ORDER BY DATE(data)
+        """
+    ).fetchall()
+
+    faturamento_por_dia = {
+        linha["dia"]: linha["total"]
+        for linha in faturamento_7_dias
+    }
+
+    grafico_labels = []
+    grafico_valores = []
+
+    hoje = datetime.now()
+
+    for i in range(6, -1, -1):
+        dia = hoje - timedelta(days=i)
+
+        data_banco = dia.strftime("%Y-%m-%d")
+        data_exibicao = dia.strftime("%d/%m")
+
+        grafico_labels.append(data_exibicao)
+
+        grafico_valores.append(
+            faturamento_por_dia.get(data_banco, 0)
+        )
 
     conn.close()
 
@@ -133,9 +249,17 @@ def dashboard():
         total_produtos=total_produtos,
         estoque_total=estoque_total,
         total_vendas=total_vendas,
-        faturamento=faturamento
-    )
-
+        faturamento=faturamento,
+        total_clientes=total_clientes,
+        faturamento_hoje=faturamento_hoje,
+        vendas_hoje=vendas_hoje,
+        estoque_baixo=estoque_baixo,
+        vendas_recentes=vendas_recentes,
+        produtos_mais_vendidos=produtos_mais_vendidos,
+        grafico_labels=grafico_labels,
+        grafico_valores=grafico_valores
+    )# Total de vendas
+ 
 
 @app.route("/produtos")
 @login_obrigatorio
